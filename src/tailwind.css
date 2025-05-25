@@ -1,2 +1,9 @@
+/*
+ * tailwind CSS entry file
+ * 1. imports the main Tailwind directives and utilities
+ * 2. loads the Tailwind configuration from the project's config file
+!  3. ensure that @config remains immediately after the @import as required
+ */
+
 @import 'tailwindcss';
 @config "../tailwind.config.js";

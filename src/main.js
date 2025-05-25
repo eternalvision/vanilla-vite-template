@@ -1,4 +1,13 @@
-import Handlebars from 'handlebars';
+/*
+ * entry point for rendering Handlebars templates with internationalization:
+ * 1. imports global styles, normalize.css, icon fonts, tailwind and custom sass
+ * 2. registers a Handlebars helper 'eq' for equality checks in templates
+ * 3. defines a 'props' function to provide data to each template by name
+ * 4. selects the '#app' root element, clears existing content, and mounts compiled templates
+ * 5. initializes i18next to update elements with 'data-lang' attributes on load and language change
+ */
+
+import Handlebars, { compile } from 'handlebars';
 import templates from './templates';
 import i18next from './i18n';
 
@@ -25,12 +34,14 @@ const props = ({ name }) => {
   }
 };
 
-const mount = document.querySelector('#app');
+const entryPoint = 'app';
+
+const mount = document.getElementById(entryPoint);
 
 mount.innerHTML = '';
 
 mount.innerHTML = Object.entries(templates)
-  .map(([name, source]) => Handlebars.compile(source)(props({ name })))
+  .map(([name, source]) => compile(source)(props({ name })))
   .join('');
 
 window.i18next = i18next.on('initialized languageChanged', () => {
