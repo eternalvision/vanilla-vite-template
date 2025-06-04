@@ -15,6 +15,7 @@
 ```
 ├── index.html                # Main HTML entry point
 ├── public                    # Static assets (images, locales)
+├── conf		      # Build-related helpers and Vite utilities
 ├── src                       # Source code
 │   ├── templates             # Handlebars templates (.hbs, .handlebars)
 │   ├── sass                  # Sass files
@@ -25,6 +26,7 @@
 ├── .env                      # Environment variables (optional)
 ├── tailwind.config.js        # Tailwind CSS configuration
 ├── vite.config.js            # Vite configuration
+├── jsconfig.json             # Project-wide JS tooling config (aliases, paths, etc.)
 ├── .eslintrc.js              # ESLint configuration
 ├── package.json              # Dependencies and scripts
 └── README.md                 # Project documentation (this file)
