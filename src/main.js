@@ -1,13 +1,12 @@
-/*
- * entry point for rendering Handlebars templates with internationalization:
- * 1. imports global styles, normalize.css, icon fonts, tailwind and custom sass
- * 2. registers a Handlebars helper 'eq' for equality checks in templates
- * 3. defines a 'props' function to provide data to each template by name
- * 4. selects the '#app' root element, clears existing content, and mounts compiled templates
- * 5. initializes i18next to update elements with 'data-lang' attributes on load and language change
+/**
+ * entry point for rendering Handlebars templates with internationalization.
+ * - imports global styles (normalize, tailwind, icons, custom SCSS)
+ * - registers common Handlebars helpers
+ * - compiles and mounts each template into #app
+ * - binds i18next to update `[data-lang]` elements on load and language change
  */
 
-import Handlebars, { compile } from 'handlebars';
+import Handlebars from 'handlebars';
 import templates from './templates';
 import i18next from './i18n';
 
@@ -17,35 +16,55 @@ import 'flag-icons/css/flag-icons.min.css';
 import '@/tailwind.css';
 import '@/sass/styles.scss';
 
+// register common helpers
 Handlebars.registerHelper('eq', (a, b) => a === b);
 
-const props = ({ name }) => {
-  switch (name) {
-    case 'nav':
-      return {};
-    case 'header':
-      return {};
-    case 'main':
-      return {};
-    case 'footer':
-      return {};
-    default:
-      return {};
-  }
+// template props resolver
+const getProps = (name) => {
+  const shared = {
+    lang: i18next.language,
+    timestamp: Date.now(),
+  };
+
+  const perTemplate = {
+    nav: {},
+    header: {},
+    main: {},
+    footer: {},
+  };
+
+  return { ...shared, ...(perTemplate[name] || {}) };
 };
 
-const entryPoint = 'app';
+// mount root
+const mount = document.getElementById('app');
 
-const mount = document.getElementById(entryPoint);
+if (!mount) {
+  console.error('Mount point "#app" not found');
+} else {
+  mount.innerHTML = ''; // cleaning previous content
 
-mount.innerHTML = '';
+  const combinedHTML = Object.entries(templates)
+    .map(([name, source]) => {
+      try {
+        return Handlebars.compile(source)(getProps(name));
+      } catch (err) {
+        console.error(`Failed to render template "${name}"`, err);
+        return '';
+      }
+    })
+    .join('');
 
-mount.innerHTML = Object.entries(templates)
-  .map(([name, source]) => compile(source)(props({ name })))
-  .join('');
+  mount.innerHTML = combinedHTML;
+}
 
-window.i18next = i18next.on('initialized languageChanged', () => {
-  document
-    .querySelectorAll('[data-lang]')
-    .forEach((el) => (el.textContent = i18next.t(el.dataset.lang)));
-});
+// bind i18next to update translatable elements
+const updateTranslations = () => {
+  document.querySelectorAll('[data-lang]').forEach((el) => {
+    const key = el.dataset.lang;
+    if (key) el.textContent = i18next.t(key);
+  });
+};
+
+i18next.on('initialized languageChanged', updateTranslations);
+updateTranslations(); // initial trigger

@@ -18,6 +18,8 @@ import tailwindcss from '@tailwindcss/postcss';
 import autoprefixer from 'autoprefixer';
 import tailwindConfig from './tailwind.config.js';
 
+import { assetFileNamer, chunkSplitter } from './conf';
+
 // derive __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -56,7 +58,7 @@ export default defineConfig({
   server: {
     port: 9999, // dev server port
     fs: {
-      allow: ['..'], // allow serving files from parent directory
+      allow: ['src', 'public'], // allow serving files from parent directory
     },
   },
 
@@ -67,7 +69,7 @@ export default defineConfig({
   build: {
     outDir: 'dist', // build output folder
     emptyOutDir: true, // clean outDir before building
-    sourcemap: true, // generate source maps
+    sourcemap: false, // generate source maps
     minify: 'esbuild', // minification tool
     target: 'es2024', // JS target for transpilation
     esbuild: {
@@ -80,30 +82,8 @@ export default defineConfig({
       output: {
         entryFileNames: 'js/[name]/[hash].js', // entry chunk naming
         chunkFileNames: 'js/[name]/[hash].js', // code-split chunk naming
-        assetFileNames: ({ name }) => {
-          if (!name) return 'assets/[name]/[hash][extname]';
-          if (name.endsWith('.css')) {
-            return 'styles/[name]/[hash][extname]';
-          }
-          if (/\.(svg)$/i.test(name)) {
-            return 'icons/[name]/[hash][extname]';
-          }
-          if (/\.(png|jpe?g|gif|webp)$/i.test(name)) {
-            return 'images/[name]/[hash][extname]';
-          }
-          if (/\.(ttf|woff|woff2)$/i.test(name)) {
-            return 'fonts/[name]/[hash][extname]';
-          }
-          return 'assets/[name]/[hash][extname]';
-        },
-        manualChunks(id) {
-          // split vendor modules into separate chunks for better caching
-          if (id.includes('node_modules')) {
-            const parts = id.split('node_modules/')[1].split('/');
-            const pkgName = parts[0].startsWith('@') ? `${parts[0]}_${parts[1]}` : parts[0];
-            return `vendor/${pkgName}`;
-          }
-        },
+        assetFileNames: ({ name }) => assetFileNamer({ name }), // asset naming based on type
+        manualChunks: (id) => chunkSplitter(id), // custom chunk splitting for vendor modules
       },
     },
     chunkSizeWarningLimit: 2000, // warn if chunk > 2000kB

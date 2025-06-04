@@ -88,4 +88,4 @@ Templates in `src/templates` are compiled and rendered into the `<div id="app">`
 
 ## License
 
-MIT © Sasha
+MIT © Alexander
