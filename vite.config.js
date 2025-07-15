@@ -9,9 +9,11 @@
  * 7. defines build output directory, sourcemaps, minification, and target
  * 8. customizes asset output naming and splits vendor modules into chunks
  * 9. sets a warning limit for large chunk sizes
+ * 10. configures vitest for unit testing with jsdom and global APIs
  */
 
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import tailwindcss from '@tailwindcss/postcss';
@@ -91,4 +93,10 @@ export default defineConfig({
 
   envDir: '.', // directory where .env files are loaded from
   envPrefix: 'VITE_', // prefix to filter and expose env variables
+
+  test: {
+    globals: true, // using (describe, it, expect) without import
+    environment: 'jsdom', // need for a DOM testing
+    exclude: [...configDefaults.exclude, 'e2e/*'],
+  },
 });

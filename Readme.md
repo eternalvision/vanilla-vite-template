@@ -7,6 +7,7 @@
 - **i18next** with HTTP backend and automatic language detection.
 - **Tailwind CSS** with custom configuration and Sass integration.
 - **Sass** for structured, reusable styles and variables.
+- **Vitest** for unit testing with `jsdom` and global test APIs.
 - **Normalize.css** , **Material Icons** , **Flag Icons** for ready-to-use global styles and icons.
 - **ESLint** with recommended rules and browser globals support.
 
@@ -15,7 +16,7 @@
 ```
 ├── index.html                # Main HTML entry point
 ├── public                    # Static assets (images, locales)
-├── conf		      # Build-related helpers and Vite utilities
+├── config                    # Build-related helpers and Vite utilities
 ├── src                       # Source code
 │   ├── templates             # Handlebars templates (.hbs, .handlebars)
 │   ├── sass                  # Sass files
@@ -23,6 +24,8 @@
 │   ├── i18n.js               # i18next configuration
 │   ├── main.js               # Handlebars init and rendering
 │   └── ...                   # Other JS modules
+├── tests                     # Unit tests (Vitest)
+│ └── example.test.js         # Sample test file
 ├── .env                      # Environment variables (optional)
 ├── tailwind.config.js        # Tailwind CSS configuration
 ├── vite.config.js            # Vite configuration
@@ -41,8 +44,9 @@ cd my-project
 
 # Install dependencies
 npm install
-# or
-yarn install
+
+# Start development server
+npm run dev
 ```
 
 ## Available Scripts
@@ -53,6 +57,7 @@ yarn install
 | `npm run build`   | Build for production into `dist/`     |
 | `npm run preview` | Preview the production build locally  |
 | `npm run lint`    | Run ESLint to check code quality      |
+| `npm run test`    | Run unit tests with Vitest            |
 
 ## Configuration
 
@@ -81,11 +86,19 @@ Translations are stored in `public/locales/{lng}/{ns}.json`. The default namespa
 
 Templates in `src/templates` are compiled and rendered into the `<div id="app">` element. Extend the `props` function in `src/main.js` to pass data.
 
+### Vitest
+
+- Configured in `vite.config.js` under the `test` key.
+- Uses `jsdom` environment for browser-like testing.
+- Globals like `describe`, `it`, `expect` are available by default.
+- Test files must match `*.test.js`, `*.spec.ts`, etc.
+
 ## Extending the Template
 
 - **Styles** : Add or modify Sass modules in `src/sass` and import them.
 - **Templates** : Create partials and layouts under `src/templates`.
 - **Localization** : Expand namespaces or custom detectors in `src/i18n.js`.
+- **Testing** : Add more test files under `tests/` or next to components.
 - **Vite Plugins** : Install and configure additional plugins in `vite.config.js`.
 
 ## License
