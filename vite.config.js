@@ -58,7 +58,7 @@ export default defineConfig({
   server: {
     port: 9999, // dev server port
     fs: {
-      allow: ['src', 'public'], // allow serving files from parent directory
+      allow: ['src', 'public', 'node_modules'], // allow serving files from parent directory
     },
   },
 
