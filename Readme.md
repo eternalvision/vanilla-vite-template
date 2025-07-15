@@ -25,7 +25,7 @@
 │   ├── main.js               # Handlebars init and rendering
 │   └── ...                   # Other JS modules
 ├── tests                     # Unit tests (Vitest)
-│ └── example.test.js         # Sample test file
+│   └── example.test.js       # Sample test file
 ├── .env                      # Environment variables (optional)
 ├── tailwind.config.js        # Tailwind CSS configuration
 ├── vite.config.js            # Vite configuration
