@@ -1,9 +1,9 @@
 /**
- * "Multi-page" entry point. Registered in `vite.config.js` under
- * `build.rollupOptions.input`; everything else is shared with the home page.
+ * "About" page entry point. Every `*.html` in the project root becomes a page;
+ * this module is what its script tag points at.
  */
 
 import { startApp } from '@/bootstrap.js';
 import { about } from '@/templates';
 
-startApp(about(), { titleKey: 'about.title' });
+startApp(({ t }) => about({ t }), { titleKey: 'about.title' });

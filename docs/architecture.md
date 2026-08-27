@@ -5,9 +5,9 @@
 ### Functional
 
 - Render static pages from composable, testable template modules.
-- Support more than one page without a client-side router.
-- Keep a stateful region up to date without destroying focus or caret position.
-- Translate pages at runtime and let the visitor switch language without a reload.
+- Support more than one page without a client-side router, and without build configuration.
+- Keep a page up to date as state changes, without destroying focus, caret or scroll position.
+- Translate at render time, with interpolation and plurals, and switch language without a reload.
 - Provide unit testing, linting, formatting, and type checking out of the box.
 
 ### Non-functional
@@ -34,34 +34,31 @@
 
 ```mermaid
 graph TD
-    HTML["index.html / about.html<br/>#app"] --> Entry["src/main.js · src/about.js"]
-    Entry --> Boot["src/bootstrap.js<br/>shared wiring"]
+    HTML["*.html<br/>#app"] --> Entry["src/main.js · src/about.js<br/>state + listeners"]
+    Entry --> Boot["src/bootstrap.js<br/>startApp → update()"]
     Boot --> Styles["tailwind.css + styles/app.css"]
     Boot --> I18n["src/i18n.js<br/>i18next, fallback bundled"]
-    Boot --> App["src/app.js<br/>render · translate · delegate"]
-    App --> Layout["templates/index.js<br/>layout({ content })"]
-    Layout --> Parts["header · nav · main | about · footer"]
+    Boot --> Layout["templates/index.js<br/>layout({ t, content })"]
+    Layout --> Parts["header · nav · home | about · footer"]
     Parts --> HtmlLib["lib/html.js<br/>escaping tagged template"]
-    App --> Dom["lib/dom.js<br/>region render + focus"]
-    Dom --> Region["[data-region='demo']"]
+    Boot --> Dom["lib/dom.js<br/>render + focus/caret/scroll"]
     I18n -->|"fetch /locales/{lng}/common.json"| Locales[("public/locales")]
-    I18n -->|"languageChanged"| App
+    I18n -->|"languageChanged"| Boot
 ```
 
-Each page is rendered once. Language changes never rebuild markup: `applyTranslations` rewrites
-`textContent` for `[data-i18n]` elements and the attributes listed in `[data-i18n-attr]`, and
-`markActiveLanguage` updates `aria-current`. State changes re-render one region and restore focus
-around it. All interaction runs through delegated `click` and `input` listeners on the root, so no
-handler is ever rebound.
+Templates call `t()` as they render, so there is no separate translation pass. A language change or
+a state change goes through the same `update()`, which re-renders the page and restores focus, caret
+and scroll position. Interaction runs through delegated listeners on the root, so re-rendering never
+unbinds a handler.
 
 ## Build structure
 
 ```mermaid
 graph LR
     Src["src/**"] --> Vite["Vite 8 (rolldown + oxc)"]
-    Conf["conf/assetFileNamer.js<br/>conf/chunkSplitter.js<br/>conf/basePath.js"] --> Vite
+    Conf["conf/assetFileNamer.js · chunkSplitter.js<br/>basePath.js · htmlEntries.js"] --> Vite
     Pkg[("package.json")] --> Meta["conf/appMetaPlugin.js"]
-    Meta -->|"virtual:app-meta<br/>%APP_*% in HTML"| Vite
+    Meta -->|"virtual:app-meta<br/>injected &lt;head&gt;"| Vite
     Pkg -->|"npm run sync:meta"| Static["LICENSE<br/>public/site.webmanifest"]
     TW["@tailwindcss/vite"] --> Vite
     Vite --> Pages["dist/index.html<br/>dist/about.html"]

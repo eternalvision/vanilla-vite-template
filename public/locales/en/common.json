@@ -14,7 +14,7 @@
   "features": {
     "build": {
       "title": "Vite build",
-      "body": "Multi-page by default: one entry per HTML file, hashed assets sorted by type, and a bundle report behind npm run analyze."
+      "body": "Every *.html in the project root is a page. Hashed assets sorted by type, one vendor chunk, and a bundle report behind npm run analyze."
     },
     "styles": {
       "title": "Tailwind CSS v4",
@@ -22,32 +22,30 @@
     },
     "i18n": {
       "title": "i18next",
-      "body": "The fallback language is bundled, so the first paint has real text; other languages load over HTTP."
+      "body": "Call t() in a template. The fallback language is bundled, so the first paint has real text."
     },
     "quality": {
       "title": "Quality gates",
       "body": "ESLint, Prettier, type-checked JSDoc and Vitest run on every commit and in CI."
     }
   },
-  "footer": {
-    "source": "Source on GitHub"
-  },
-  "counter": {
-    "label": "Clicks:"
-  },
   "demo": {
-    "hint": "Type your name: the region re-renders on every keystroke, and the caret stays put.",
+    "hint": "Change the state and the page re-renders — focus, caret and scroll position survive.",
     "label": "Your name",
-    "greeting": "Hello,"
+    "greeting": "Hello, {{name}}!",
+    "clicks_one": "{{count}} click",
+    "clicks_other": "{{count}} clicks"
   },
   "about": {
     "title": "Adding a page",
-    "body": "This template is multi-page by default: no client-side router, no history API, just another HTML entry point.",
+    "body": "This template is multi-page by default: no client-side router, no history API, just another HTML file.",
     "steps": {
-      "html": "Create about.html next to index.html and point its script at a new entry module.",
-      "entry": "Create src/about.js, import startApp from the shared bootstrap, and pass it the page content.",
-      "input": "Register the HTML file under build.rollupOptions.input in vite.config.js."
+      "html": "Copy index.html to blog.html and point its script at /src/blog.js.",
+      "entry": "Create src/blog.js and call startApp with the page content. There is no build config to edit."
     },
     "back": "Back to the home page"
+  },
+  "footer": {
+    "source": "Source on GitHub"
   }
 }

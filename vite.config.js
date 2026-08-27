@@ -15,8 +15,15 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-import { appMetaPlugin, assetFileNamer, chunkSplitter, normalizeBasePath } from './conf/index.js';
+import {
+  appMetaPlugin,
+  assetFileNamer,
+  chunkSplitter,
+  findHtmlEntries,
+  normalizeBasePath,
+} from './conf/index.js';
 
+const rootDir = fileURLToPath(new URL('.', import.meta.url));
 const srcDir = fileURLToPath(new URL('./src', import.meta.url));
 
 // GitHub project pages are served from /<repo>/, so the deploy workflow sets BASE_PATH
@@ -66,11 +73,8 @@ export default defineConfig(({ mode }) => {
       cssMinify: 'lightningcss',
       chunkSizeWarningLimit: 500,
       rollupOptions: {
-        // one entry per HTML page; add a file here to add a page
-        input: {
-          index: fileURLToPath(new URL('./index.html', import.meta.url)),
-          about: fileURLToPath(new URL('./about.html', import.meta.url)),
-        },
+        // every *.html in the project root is a page; nothing to register
+        input: findHtmlEntries(rootDir),
         output: {
           entryFileNames: 'js/[name]-[hash].js',
           chunkFileNames: 'js/[name]-[hash].js',

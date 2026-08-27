@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { captureFocus, renderInto, restoreFocus, withPreservedFocus } from '@/lib/dom.js';
+import { captureFocus, renderInto, restoreFocus, withPreservedView } from '@/lib/dom.js';
 import { html } from '@/lib/html.js';
 
 /** @type {HTMLElement} */
@@ -70,14 +70,14 @@ describe('restoreFocus', () => {
   });
 });
 
-describe('withPreservedFocus', () => {
+describe('withPreservedView', () => {
   it('moves focus onto the replacement node', () => {
     root.innerHTML = '<div id="region"><button data-focus-key="go">a</button></div>';
     const region = /** @type {Element} */ (root.querySelector('#region'));
     const before = root.querySelector('[data-focus-key="go"]');
     /** @type {HTMLElement} */ (before).focus();
 
-    withPreservedFocus(root, () => {
+    withPreservedView(root, () => {
       renderInto(region, html`<button data-focus-key="go">b</button>`);
     });
 
@@ -89,7 +89,7 @@ describe('withPreservedFocus', () => {
   it('runs the update even when nothing was focused', () => {
     root.innerHTML = '<div id="region">old</div>';
 
-    withPreservedFocus(root, () => {
+    withPreservedView(root, () => {
       renderInto(/** @type {Element} */ (root.querySelector('#region')), html`new`);
     });
 
