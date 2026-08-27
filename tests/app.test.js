@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { APP_META } from 'virtual:app-meta';
+
 import { applyTranslations, bindEvents, markActiveLanguage, render } from '@/app.js';
 
 /** @type {HTMLElement} */
@@ -32,6 +34,21 @@ describe('render', () => {
     );
 
     expect(codes).toEqual(['en', 'uk']);
+  });
+
+  it('links the footer to the repository from package.json', () => {
+    render(root, PROPS);
+
+    const link = root.querySelector('footer a');
+
+    expect(link?.getAttribute('href')).toBe(APP_META.repositoryUrl);
+    expect(APP_META.repositoryUrl).toMatch(/^https:\/\//);
+  });
+
+  it('credits the author from package.json', () => {
+    render(root, PROPS);
+
+    expect(root.querySelector('footer')?.textContent).toContain(APP_META.author);
   });
 
   it('replaces previous content instead of appending', () => {

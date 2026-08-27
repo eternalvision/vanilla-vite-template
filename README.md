@@ -35,6 +35,43 @@ The dev server listens on **http://localhost:9999** and is exposed on the local 
 
 Requires Node.js **22.12 or newer**.
 
+## Make it yours
+
+Project identity lives in **`package.json` only** — `name`, `description`, `author`, `repository`,
+and `license`. Everything else derives from it
+([ADR-0007](docs/adr/0007-project-identity-from-package-json.md)):
+
+| Consumer                                                 | How it gets there                                                |
+| -------------------------------------------------------- | ---------------------------------------------------------------- |
+| Footer credit and repository link                        | `virtual:app-meta` module, injected by `conf/appMetaPlugin.js`   |
+| `index.html` title, description, author, Open Graph tags | `%APP_NAME%` / `%APP_DESCRIPTION%` / `%APP_AUTHOR%` placeholders |
+| `LICENSE` copyright holder                               | `npm run sync:meta`                                              |
+| `public/site.webmanifest` name and description           | `npm run sync:meta`                                              |
+
+So, after forking:
+
+```bash
+# 1. edit name / description / author / repository in package.json
+# 2. propagate it into the files that cannot read it at runtime
+npm run sync:meta
+```
+
+`npm run sync:meta:check` fails when those files drift from `package.json`; it runs in `npm run
+check` and in CI, so the two cannot silently disagree. The licence _year_ is never rewritten — the
+start year is a fact about your project.
+
+Left to change by hand, because they are content rather than identity: `app.name` and `app.title`
+in `public/locales/*/common.json`, `short_name` in the manifest (it has its own length limit), and
+`public/logo.svg`.
+
+To read the identity from your own code:
+
+```js
+import { APP_META } from 'virtual:app-meta';
+
+console.log(APP_META.name, APP_META.repositoryUrl);
+```
+
 ## Scripts
 
 | Command                          | What it does                                                     |
@@ -57,6 +94,8 @@ Requires Node.js **22.12 or newer**.
 ├── .github/workflows/ci.yml   # lint, format, typecheck, coverage, build
 ├── .husky/                    # pre-commit (lint-staged), pre-push (typecheck + tests)
 ├── conf/                      # build helpers used by vite.config.js
+│   ├── appMeta.js             # project identity read from package.json
+│   ├── appMetaPlugin.js       # exposes it as virtual:app-meta and to index.html
 │   ├── assetFileNamer.js      # output folder per asset type
 │   └── chunkSplitter.js       # single vendor chunk
 ├── docs/
@@ -75,7 +114,10 @@ Requires Node.js **22.12 or newer**.
 │   ├── i18n.js                # i18next setup
 │   ├── app.js                 # render, translate, event binding
 │   └── main.js                # entry point
+├── scripts/
+│   └── syncMeta.js            # writes package.json identity into LICENSE + manifest
 ├── tests/                     # Vitest specs
+├── types/                     # ambient declarations (virtual:app-meta)
 ├── index.html
 ├── jsconfig.json              # aliases + checkJs
 ├── vite.config.js

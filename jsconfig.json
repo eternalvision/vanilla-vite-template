@@ -28,6 +28,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false
   },
-  "include": ["src", "conf", "tests", "*.config.js"],
+  "include": ["src", "conf", "scripts", "tests", "types", "*.config.js"],
   "exclude": ["node_modules", "dist", "coverage"]
 }

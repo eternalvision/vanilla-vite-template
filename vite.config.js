@@ -12,7 +12,7 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-import { assetFileNamer, chunkSplitter } from './conf/index.js';
+import { appMetaPlugin, assetFileNamer, chunkSplitter } from './conf/index.js';
 
 const srcDir = fileURLToPath(new URL('./src', import.meta.url));
 
@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
     cacheDir: 'node_modules/.vite',
 
     plugins: [
+      appMetaPlugin(),
       tailwindcss(),
       isAnalyze &&
         visualizer({

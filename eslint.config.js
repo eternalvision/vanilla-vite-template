@@ -36,8 +36,14 @@ export default defineConfig([
   },
 
   {
-    files: ['conf/**/*.js', '*.config.js'],
+    files: ['conf/**/*.js', 'scripts/**/*.js', '*.config.js'],
     languageOptions: { globals: globals.node },
+  },
+
+  {
+    // CLI scripts report to stdout — that is their interface
+    files: ['scripts/**/*.js'],
+    rules: { 'no-console': 'off' },
   },
 
   {

@@ -6,6 +6,14 @@
   "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Sass, Vitest.",
   "license": "MIT",
   "author": "Alexander Priadchenko",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eternalvision/vanilla-vite-template.git"
+  },
+  "homepage": "https://github.com/eternalvision/vanilla-vite-template#readme",
+  "bugs": {
+    "url": "https://github.com/eternalvision/vanilla-vite-template/issues"
+  },
   "engines": {
     "node": ">=22.12.0"
   },
@@ -23,7 +31,9 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "check": "npm run lint && npm run format && npm run typecheck && npm run test",
+    "sync:meta": "node scripts/syncMeta.js",
+    "sync:meta:check": "node scripts/syncMeta.js --check",
+    "check": "npm run lint && npm run format && npm run typecheck && npm run sync:meta:check && npm run test",
     "prepare": "husky"
   },
   "lint-staged": {

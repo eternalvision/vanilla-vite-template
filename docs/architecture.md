@@ -18,6 +18,7 @@
 | Reproducibility | A build never mutates its input                                          | Autofix moved into hooks ([ADR-0006](adr/0006-quality-gates.md))                                                                                     |
 | Accessibility   | Visible focus, honoured `prefers-reduced-motion`, state exposed via ARIA | `src/sass/_app.scss`, `aria-current` on the language switcher                                                                                        |
 | Maintainability | One configuration surface per concern                                    | CSS-first Tailwind ([ADR-0002](adr/0002-tailwind-v4-via-vite-plugin.md)), separate Vite and Vitest configs                                           |
+| Forkability     | Project identity has exactly one home                                    | `package.json` feeds the bundle, `index.html`, `LICENSE`, and the manifest ([ADR-0007](adr/0007-project-identity-from-package-json.md))              |
 
 ### Constraints
 
@@ -50,6 +51,9 @@ listener, so no handler has to be rebound.
 graph LR
     Src["src/**"] --> Vite["Vite 8 (rolldown + oxc)"]
     Conf["conf/assetFileNamer.js<br/>conf/chunkSplitter.js"] --> Vite
+    Pkg[("package.json")] --> Meta["conf/appMetaPlugin.js"]
+    Meta -->|"virtual:app-meta<br/>%APP_*% in index.html"| Vite
+    Pkg -->|"npm run sync:meta"| Static["LICENSE<br/>public/site.webmanifest"]
     TW["@tailwindcss/vite"] --> Vite
     Vite --> JS["dist/js/index-*.js<br/>dist/js/vendor-*.js"]
     Vite --> CSS["dist/styles/*.css"]
@@ -59,13 +63,15 @@ graph LR
 
 ## Failure modes
 
-| Failure                            | Behaviour                                                         | Mitigation                                                                             |
-| ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `#app` missing from `index.html`   | Entry throws immediately                                          | Explicit `throw` with a message naming the file, instead of a silent `console.error`   |
-| A locale file 404s                 | i18next falls back to `en`; missing keys render as the key string | `fallbackLng`, `supportedLngs`, and `load: 'languageOnly'` so `en-GB` resolves to `en` |
-| A translation contains markup      | Rendered as literal text                                          | Translations are written with `textContent`, never `innerHTML` (covered by a test)     |
-| A template interpolates user input | Escaped                                                           | `html` escapes by default; bypassing it requires an explicit `raw()`                   |
-| A dependency bloats the bundle     | Build warns above 500 kB per chunk                                | `npm run analyze` produces a treemap at `dist/stats.html`                              |
+| Failure                                     | Behaviour                                                         | Mitigation                                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `#app` missing from `index.html`            | Entry throws immediately                                          | Explicit `throw` with a message naming the file, instead of a silent `console.error`   |
+| A locale file 404s                          | i18next falls back to `en`; missing keys render as the key string | `fallbackLng`, `supportedLngs`, and `load: 'languageOnly'` so `en-GB` resolves to `en` |
+| A translation contains markup               | Rendered as literal text                                          | Translations are written with `textContent`, never `innerHTML` (covered by a test)     |
+| A template interpolates user input          | Escaped                                                           | `html` escapes by default; bypassing it requires an explicit `raw()`                   |
+| A dependency bloats the bundle              | Build warns above 500 kB per chunk                                | `npm run analyze` produces a treemap at `dist/stats.html`                              |
+| `LICENSE` or the manifest is edited by hand | They drift from `package.json`                                    | `npm run sync:meta:check` fails the gate locally and in CI                             |
+| `package.json` has no `repository`          | Footer link would be empty                                        | `normalizeRepositoryUrl` returns `''` and the footer omits the link                    |
 
 ## Risks
 

@@ -39,6 +39,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Check generated files match package.json
+        run: npm run sync:meta:check
+
       - name: Test with coverage
         run: npm run test:coverage
 

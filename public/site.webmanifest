@@ -13,5 +13,6 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Sass, Vitest."
 }
