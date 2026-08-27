@@ -91,10 +91,13 @@ console.log(APP_META.name, APP_META.repositoryUrl);
 ## Project structure
 
 ```
-├── .github/workflows/ci.yml   # lint, format, typecheck, coverage, build
+├── .github/workflows/
+│   ├── ci.yml                 # lint, format, typecheck, coverage, build
+│   └── deploy.yml             # build with BASE_PATH and publish to GitHub Pages
 ├── .husky/                    # pre-commit (lint-staged), pre-push (typecheck + tests)
 ├── conf/                      # build helpers used by vite.config.js
 │   ├── appMeta.js             # project identity read from package.json
+│   ├── basePath.js            # BASE_PATH normalization
 │   ├── appMetaPlugin.js       # exposes it as virtual:app-meta and to index.html
 │   ├── assetFileNamer.js      # output folder per asset type
 │   └── chunkSplitter.js       # single vendor chunk
@@ -251,8 +254,44 @@ for everything else — all content-hashed. Third-party code lands in a single `
 ## Deployment
 
 The build is a static bundle — any static host works. Serve `dist/`, and for a single-page setup
-rewrite unknown paths to `/index.html`. If the site is hosted under a sub-path, set `base` in
-[`vite.config.js`](vite.config.js); the i18next `loadPath` already follows `import.meta.env.BASE_URL`.
+rewrite unknown paths to `/index.html`.
+
+### Base path
+
+The public base path is a build input, not a constant
+([ADR-0008](docs/adr/0008-configurable-base-path-and-pages-deploy.md)):
+
+```bash
+npm run build                          # served from the domain root
+BASE_PATH=my-repo npm run build        # served from https://host/my-repo/
+```
+
+`BASE_PATH` accepts `my-repo`, `/my-repo`, or `/my-repo/` — all normalize to `/my-repo/`.
+
+When referencing files from `public/` inside JavaScript, build the URL from the base rather than
+writing a root-absolute path, which breaks under a sub-path:
+
+```js
+html`<img src="${import.meta.env.BASE_URL}logo.svg" alt="" />`;
+```
+
+In `index.html`, use the `%APP_BASE%` placeholder for the same reason. The web manifest already
+uses paths relative to itself, so it needs no substitution.
+
+### GitHub Pages
+
+`.github/workflows/deploy.yml` builds with `BASE_PATH` set to the repository name and publishes
+`dist/` on every push to `main`.
+
+**One-time setup:** in the repository, open **Settings → Pages** and set **Source** to
+**GitHub Actions**. Without it, Pages keeps publishing the repository source, which serves the
+unbuilt `index.html` — placeholders in the title and a 404 for `/src/main.js`.
+
+To preview a sub-path build locally:
+
+```bash
+BASE_PATH=my-repo npm run build && npx vite preview --base /my-repo/
+```
 
 ## License
 

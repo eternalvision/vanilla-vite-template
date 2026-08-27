@@ -19,6 +19,7 @@
 | Accessibility   | Visible focus, honoured `prefers-reduced-motion`, state exposed via ARIA | `src/sass/_app.scss`, `aria-current` on the language switcher                                                                                        |
 | Maintainability | One configuration surface per concern                                    | CSS-first Tailwind ([ADR-0002](adr/0002-tailwind-v4-via-vite-plugin.md)), separate Vite and Vitest configs                                           |
 | Forkability     | Project identity has exactly one home                                    | `package.json` feeds the bundle, `index.html`, `LICENSE`, and the manifest ([ADR-0007](adr/0007-project-identity-from-package-json.md))              |
+| Portability     | One build serves a domain root or a sub-path                             | `BASE_PATH` build input, `import.meta.env.BASE_URL` in templates ([ADR-0008](adr/0008-configurable-base-path-and-pages-deploy.md))                   |
 
 ### Constraints
 
@@ -63,15 +64,16 @@ graph LR
 
 ## Failure modes
 
-| Failure                                     | Behaviour                                                         | Mitigation                                                                             |
-| ------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `#app` missing from `index.html`            | Entry throws immediately                                          | Explicit `throw` with a message naming the file, instead of a silent `console.error`   |
-| A locale file 404s                          | i18next falls back to `en`; missing keys render as the key string | `fallbackLng`, `supportedLngs`, and `load: 'languageOnly'` so `en-GB` resolves to `en` |
-| A translation contains markup               | Rendered as literal text                                          | Translations are written with `textContent`, never `innerHTML` (covered by a test)     |
-| A template interpolates user input          | Escaped                                                           | `html` escapes by default; bypassing it requires an explicit `raw()`                   |
-| A dependency bloats the bundle              | Build warns above 500 kB per chunk                                | `npm run analyze` produces a treemap at `dist/stats.html`                              |
-| `LICENSE` or the manifest is edited by hand | They drift from `package.json`                                    | `npm run sync:meta:check` fails the gate locally and in CI                             |
-| `package.json` has no `repository`          | Footer link would be empty                                        | `normalizeRepositoryUrl` returns `''` and the footer omits the link                    |
+| Failure                                     | Behaviour                                                         | Mitigation                                                                                                      |
+| ------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `#app` missing from `index.html`            | Entry throws immediately                                          | Explicit `throw` with a message naming the file, instead of a silent `console.error`                            |
+| A locale file 404s                          | i18next falls back to `en`; missing keys render as the key string | `fallbackLng`, `supportedLngs`, and `load: 'languageOnly'` so `en-GB` resolves to `en`                          |
+| A translation contains markup               | Rendered as literal text                                          | Translations are written with `textContent`, never `innerHTML` (covered by a test)                              |
+| A template interpolates user input          | Escaped                                                           | `html` escapes by default; bypassing it requires an explicit `raw()`                                            |
+| A dependency bloats the bundle              | Build warns above 500 kB per chunk                                | `npm run analyze` produces a treemap at `dist/stats.html`                                                       |
+| `LICENSE` or the manifest is edited by hand | They drift from `package.json`                                    | `npm run sync:meta:check` fails the gate locally and in CI                                                      |
+| `package.json` has no `repository`          | Footer link would be empty                                        | `normalizeRepositoryUrl` returns `''` and the footer omits the link                                             |
+| App served from a sub-path                  | Root-absolute asset URLs would 404                                | `index.html` uses `%APP_BASE%`, templates use `import.meta.env.BASE_URL`, the manifest uses self-relative paths |
 
 ## Risks
 
