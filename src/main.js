@@ -1,70 +1,41 @@
 /**
- * entry point for rendering Handlebars templates with internationalization.
- * - imports global styles (normalize, tailwind, icons, custom SCSS)
- * - registers common Handlebars helpers
- * - compiles and mounts each template into #app
- * - binds i18next to update `[data-lang]` elements on load and language change
+ * Entry point: loads global styles, renders the layout into `#app`, and keeps
+ * it translated as the language changes.
  */
 
-import Handlebars from 'handlebars';
-import templates from './templates';
-import i18next from './i18n';
-
-import 'normalize.css';
-import 'material-icons/iconfont/material-icons.css';
-import 'flag-icons/css/flag-icons.min.css';
 import '@/tailwind.css';
 import '@/sass/styles.scss';
 
-// register common helpers
-Handlebars.registerHelper('eq', (a, b) => a === b);
+import i18next, { i18nReady, SUPPORTED_LANGUAGES } from '@/i18n.js';
+import { applyTranslations, bindEvents, markActiveLanguage, render } from '@/app.js';
 
-// template props resolver
-const getProps = (name) => {
-  const shared = {
-    lang: i18next.language,
-    timestamp: Date.now(),
-  };
+const root = document.getElementById('app');
 
-  const perTemplate = {
-    nav: {},
-    header: {},
-    main: {},
-    footer: {},
-  };
-
-  return { ...shared, ...(perTemplate[name] || {}) };
-};
-
-// mount root
-const mount = document.getElementById('app');
-
-if (!mount) {
-  console.error('Mount point "#app" not found');
-} else {
-  mount.innerHTML = ''; // cleaning previous content
-
-  const combinedHTML = Object.entries(templates)
-    .map(([name, source]) => {
-      try {
-        return Handlebars.compile(source)(getProps(name));
-      } catch (err) {
-        console.error(`Failed to render template "${name}"`, err);
-        return '';
-      }
-    })
-    .join('');
-
-  mount.innerHTML = combinedHTML;
+if (!root) {
+  throw new Error('Mount point "#app" not found in index.html');
 }
 
-// bind i18next to update translatable elements
-const updateTranslations = () => {
-  document.querySelectorAll('[data-lang]').forEach((el) => {
-    const key = el.dataset.lang;
-    if (key) el.textContent = i18next.t(key);
-  });
+render(root, {
+  languages: SUPPORTED_LANGUAGES,
+  language: i18next.resolvedLanguage ?? i18next.language,
+  year: new Date().getFullYear(),
+});
+
+bindEvents(root, {
+  onLanguageChange: (language) => {
+    void i18next.changeLanguage(language);
+  },
+});
+
+const syncLanguage = () => {
+  const language = i18next.resolvedLanguage ?? i18next.language;
+
+  document.documentElement.lang = language;
+  document.title = i18next.t('app.title');
+
+  applyTranslations(root, (key) => i18next.t(key));
+  markActiveLanguage(root, language);
 };
 
-i18next.on('initialized languageChanged', updateTranslations);
-updateTranslations(); // initial trigger
+i18next.on('languageChanged', syncLanguage);
+void i18nReady.then(syncLanguage);

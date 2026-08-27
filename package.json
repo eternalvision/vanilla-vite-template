@@ -1,49 +1,63 @@
 {
   "name": "vanilla-vite-template",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Sass, Vitest.",
+  "license": "MIT",
+  "author": "Alexander Priadchenko",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vite --host",
-    "prebuild": "npm run format:fix && npm run lint:fix",
     "build": "vite build",
     "analyze": "vite build --mode analyze",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.mjs",
-    "lint:fix": "eslint . --ext .js,.mjs --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "typecheck": "tsc --noEmit -p jsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run format && npm run typecheck && npm run test",
+    "prepare": "husky"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.24.0",
-    "@tailwindcss/postcss": "^4.1.6",
-    "@tailwindcss/vite": "^4.1.6",
-    "@types/node": "^22.15.29",
-    "@vitest/ui": "^3.2.4",
-    "autoprefixer": "^10.4.21",
-    "esbuild": "^0.24.0",
-    "eslint": "^9.24.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsdoc": "^50.6.9",
-    "globals": "^16.0.0",
-    "handlebars": "^4.7.8",
-    "jsdom": "^26.1.0",
-    "postcss": "^8.5.3",
-    "prettier": "^3.5.3",
-    "tailwindcss": "^4.1.6",
-    "vite": "^6.2.5",
-    "vitest": "^3.2.4"
+  "lint-staged": {
+    "*.{js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,scss,html,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
-    "axios": "^1.9.0",
-    "flag-icons": "^7.3.2",
-    "i18next": "^25.1.2",
-    "i18next-browser-languagedetector": "^8.1.0",
-    "i18next-http-backend": "^3.0.2",
-    "material-icons": "^1.13.14",
-    "normalize.css": "^8.0.1",
-    "sass-embedded": "^1.88.0"
+    "i18next": "^26.4.0",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "i18next-http-backend": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.4.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/ui": "^4.1.11",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "jsdom": "^30.0.1",
+    "lint-staged": "^17.4.1",
+    "prettier": "^3.9.6",
+    "rollup-plugin-visualizer": "^7.1.1",
+    "sass-embedded": "^1.103.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

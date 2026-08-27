@@ -23,4 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
+.envcoverage
+dist/stats.html
+.env.*
+!.env.example
+
+# local tooling
+.claude/
+.remember/

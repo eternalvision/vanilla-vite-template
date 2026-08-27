@@ -1,8 +1,18 @@
-import nav from './nav.hbs?raw';
-import header from './header.hbs?raw';
-import main from './main.hbs?raw';
-import footer from './footer.hbs?raw';
+import { html } from '@/lib/html.js';
+import { header } from './header.js';
+import { main } from './main.js';
+import { footer } from './footer.js';
 
-const templates = { nav, header, main, footer };
+export { header, main, footer };
+export { nav } from './nav.js';
 
-export default templates;
+/**
+ * Full page layout. Kept as a pure function of its props so it can be rendered
+ * and asserted on in tests without a browser.
+ *
+ * @param {{ languages: readonly string[], language: string, year: number }} props
+ * @returns {import('@/lib/html.js').RawHtml}
+ */
+export const layout = ({ languages, language, year }) => html`
+  ${header({ languages, language })}${main()}${footer({ year })}
+`;
