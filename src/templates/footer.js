@@ -3,10 +3,10 @@ import { APP_META } from 'virtual:app-meta';
 import { html } from '@/lib/html.js';
 
 /**
- * @param {{ year: number }} props
+ * @param {{ t: import('i18next').TFunction, year: number }} props
  * @returns {import('@/lib/html.js').RawHtml}
  */
-export const footer = ({ year }) => html`
+export const footer = ({ t, year }) => html`
   <footer class="border-t border-slate-200 dark:border-slate-800">
     <div
       class="mx-auto flex max-w-3xl flex-col items-center gap-1 px-6 py-8 text-sm
@@ -19,8 +19,9 @@ export const footer = ({ year }) => html`
             href="${APP_META.repositoryUrl}"
             rel="noopener noreferrer"
             target="_blank"
-            class="underline-offset-4 hover:underline"
-            data-i18n="footer.source"></a>
+            class="underline-offset-4 hover:underline">
+            ${t('footer.source')}
+          </a>
         `
       }
     </div>

@@ -34,7 +34,8 @@ export const i18nReady = i18next
     load: 'languageOnly',
     ns: [DEFAULT_NAMESPACE],
     defaultNS: DEFAULT_NAMESPACE,
-    debug: import.meta.env.DEV,
+    // noisy in dev, silent in tests
+    debug: import.meta.env.DEV && import.meta.env.MODE !== 'test',
     resources: {
       [FALLBACK_LANGUAGE]: { [DEFAULT_NAMESPACE]: fallbackCommon },
     },

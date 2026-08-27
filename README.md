@@ -21,7 +21,7 @@ interdependent stateful views, reach for a framework instead; this template will
 | ---------- | ----------------------------------------------------------------------------- |
 | Build      | Vite 8 (rolldown bundler, oxc minifier, Lightning CSS), multi-page            |
 | Templating | Tagged template literals with automatic escaping (`src/lib/html.js`)          |
-| Updates    | Region re-render with focus preservation (`src/lib/dom.js`)                   |
+| Updates    | One `update()` per page; focus, caret and scroll are preserved                |
 | Styles     | Tailwind CSS v4 via `@tailwindcss/vite`, configured in CSS; plain CSS globals |
 | i18n       | i18next, fallback language bundled, the rest fetched on demand                |
 | Tests      | Vitest + jsdom, V8 coverage                                                   |
@@ -111,10 +111,11 @@ console.log(APP_META.name, APP_META.repositoryUrl);
 ├── .husky/                    # pre-commit (lint-staged), pre-push (typecheck + tests)
 ├── conf/                      # build helpers used by vite.config.js
 │   ├── appMeta.js             # project identity read from package.json
-│   ├── appMetaPlugin.js       # exposes it as virtual:app-meta and to the HTML entries
+│   ├── appMetaPlugin.js       # virtual:app-meta + the injected <head>
 │   ├── assetFileNamer.js      # output folder per asset type
 │   ├── basePath.js            # BASE_PATH normalization
-│   └── chunkSplitter.js       # single vendor chunk
+│   ├── chunkSplitter.js       # single vendor chunk
+│   └── htmlEntries.js         # every *.html in the root becomes a page
 ├── docs/
 │   ├── architecture.md        # requirements, diagrams, failure modes, risks
 │   └── adr/                   # architecture decision records
@@ -129,18 +130,17 @@ console.log(APP_META.name, APP_META.repositoryUrl);
 ├── src/
 │   ├── lib/
 │   │   ├── html.js            # escaping tagged template literal
-│   │   └── dom.js             # region rendering + focus preservation
-│   ├── templates/             # header, nav, main (+ demo region), about, footer, layout
+│   │   └── dom.js             # rendering + focus, caret and scroll preservation
+│   ├── templates/             # header, nav, home, about, footer, layout
 │   ├── styles/app.css         # global rules Tailwind's preflight does not cover
 │   ├── tailwind.css           # Tailwind entry, @theme tokens
 │   ├── i18n.js                # i18next setup, fallback locale bundled
-│   ├── app.js                 # render, translate, event delegation
-│   ├── bootstrap.js           # shared entry-point wiring
+│   ├── bootstrap.js           # startApp: shell, translations, update()
 │   ├── main.js                # home page entry
 │   └── about.js               # about page entry
 ├── tests/                     # Vitest specs
 ├── types/                     # ambient declarations (virtual:app-meta)
-├── index.html
+├── index.html                 # 9 lines; the head is injected
 ├── about.html
 ├── jsconfig.json              # aliases + checkJs
 ├── vite.config.js
@@ -168,6 +168,8 @@ export const card = ({ title, items }) => html`
 Rules worth knowing:
 
 - `null`, `undefined`, and `false` render as an empty string, so ``${flag && html`…`}`` works.
+  The flip side: never interpolate a boolean into an attribute — `aria-current="${isActive}"`
+  produces `aria-current=""`. Spell the value out, as `src/templates/nav.js` does.
 - Arrays are concatenated — no `.join('')` needed.
 - `raw(value)` skips escaping. Use it only for markup you produced yourself.
 - The result is a `RawHtml` object; take `.value` when you need the string.
@@ -175,83 +177,113 @@ Rules worth knowing:
 
 ## Pages
 
-The template is multi-page: one HTML file per page, each with its own entry module. To add `blog`:
+Every `*.html` file in the project root is a page — there is no build config to edit. To add `blog`:
 
-1. Copy `about.html` to `blog.html` and point its `<script>` at `/src/blog.js`.
+1. Copy `index.html` to `blog.html` and point its script at `/src/blog.js`.
 2. Create `src/blog.js`:
 
    ```js
    import { startApp } from '@/bootstrap.js';
    import { html } from '@/lib/html.js';
 
-   startApp(html`<main>…</main>`);
+   startApp(({ t }) => html`<main>${t('blog.title')}</main>`);
    ```
 
-3. Register the HTML file in `vite.config.js`:
+That is the whole procedure. A page's HTML is nine lines, because the shared `<head>` — description,
+Open Graph tags, icons, manifest — is injected from `package.json` at build time
+([ADR-0014](docs/adr/0014-discover-pages-and-inject-the-head.md)):
 
-   ```js
-   input: {
-     index: fileURLToPath(new URL('./index.html', import.meta.url)),
-     about: fileURLToPath(new URL('./about.html', import.meta.url)),
-     blog: fileURLToPath(new URL('./blog.html', import.meta.url)),
-   }
-   ```
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <script type="module" src="/src/blog.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>This page needs JavaScript enabled to render.</noscript>
+  </body>
+</html>
+```
 
-`src/bootstrap.js` holds everything the pages share — styles, the header/footer shell, translation
-syncing, event delegation — and Vite code-splits it into a chunk both pages reuse. Link between
-pages with the `.html` extension so the URLs resolve on every static host.
+A page that wants its own static `<title>` can just write one; the injected default steps aside.
+`src/bootstrap.js` holds everything pages share — styles, the header/footer shell, the language
+switcher — and Vite code-splits it into a chunk every page reuses. Link between pages with the
+`.html` extension so the URLs resolve on every static host.
 
 ## State and updates
 
-The layout is rendered once. When state changes, re-render only the region that owns it — replacing
-markup destroys focus, caret position, and scroll state inside it:
+State is a plain object. Change it, call `update()`, and the page re-renders with focus, caret and
+scroll position preserved:
 
 ```js
-import { renderInto, withPreservedFocus } from '@/lib/dom.js';
+const state = { name: '', count: 0 };
 
-withPreservedFocus(root, () => {
-  renderInto(region, demo(state));
+const app = startApp(({ t }) => home({ t, state }));
+
+app.root.addEventListener('input', (event) => {
+  if (event.target.dataset.field !== 'name') return;
+
+  state.name = event.target.value;
+  app.update();
 });
 ```
 
-An element opts into focus restoration with `data-focus-key`; text fields also keep their caret
-position. Event listeners are delegated on the root, so a region can be replaced without rebinding
-anything. The demo region on the home page re-renders on every keystroke and is covered by tests.
+Listeners live on `app.root` and use delegation, so re-rendering never unbinds anything. An element
+opts into focus restoration with `data-focus-key`; text fields also keep their caret position. The
+home page does exactly this and is covered by tests.
 
-Two consequences to keep in mind: node identity inside a region is not stable, so re-query elements
-instead of holding references; and anything without `data-focus-key` loses focus on update.
+Two consequences: node identity is not stable across an update, so re-query elements rather than
+holding references; and anything without `data-focus-key` loses focus when the page re-renders.
 
-**When this is not enough** — many stateful regions, list reordering, animation across updates —
-swap the render layer for [lit-html](https://lit.dev/docs/libraries/standalone-templates/) (~5 kB).
-Its `html` tag is a drop-in replacement for this one at the call sites; `renderInto` becomes
-lit-html's `render`, and `data-focus-key` handling can go, because lit-html patches the DOM in place
-instead of replacing it.
+For a page too large to re-render wholesale, `renderInto(region, markup)` from `src/lib/dom.js`
+replaces one region instead. **When even that is not enough** — many stateful regions, list
+reordering, animation across updates — swap the render layer for
+[lit-html](https://lit.dev/docs/libraries/standalone-templates/) (~5 kB): its `html` tag is a
+drop-in at the call sites, `renderInto` becomes lit-html's `render`, and `data-focus-key` handling
+can go, because lit-html patches the DOM in place.
 
 ## Internationalisation
 
-Translations are static JSON under `public/locales/{lng}/{ns}.json`. The fallback language (`en`) is
-bundled so the first paint has real text; other languages are fetched on demand
-([ADR-0012](docs/adr/0012-bundle-the-fallback-locale.md)).
+Call `t()` in the template. Interpolation, plurals and translated attributes all come from i18next
+([ADR-0013](docs/adr/0013-translate-in-templates.md)):
 
-Mark translatable content in markup:
-
-```html
-<h1 data-i18n="hero.title"></h1>
-<nav data-i18n-attr="aria-label:nav.languages, title:app.name"></nav>
+```js
+html`
+  <h1>${t('hero.title')}</h1>
+  <p>${t('demo.greeting', { name })}</p>
+  <button aria-label="${t('nav.languages')}">${t('demo.clicks', { count })}</button>
+`;
 ```
 
-`applyTranslations` fills `[data-i18n]` elements via `textContent` — a translation can never inject
-markup — and sets each `attribute:key` pair listed in `[data-i18n-attr]`.
+Values are escaped by the `html` tag, so a translation — or a user-supplied name inside one — can
+never inject markup.
+
+Translations are static JSON under `public/locales/{lng}/{ns}.json`. The fallback language (`en`) is
+bundled, so the first paint has real text; other languages are fetched on demand
+([ADR-0012](docs/adr/0012-bundle-the-fallback-locale.md)). Plural forms use i18next's suffixes, and
+each language may have as many as its grammar needs:
+
+```json
+{
+  "demo": {
+    "clicks_one": "{{count}} click",
+    "clicks_other": "{{count}} clicks"
+  }
+}
+```
 
 **To add a language:** create `public/locales/<code>/common.json` and add `<code>` to
-`SUPPORTED_LANGUAGES` in [`src/i18n.js`](src/i18n.js).
+`SUPPORTED_LANGUAGES` in [`src/i18n.js`](src/i18n.js). A test fails if the files disagree about
+which keys exist — a missing translation falls back to English silently, which is exactly the kind
+of bug that surfaces months later.
 
-**To remove one:** delete its folder and its entry in that same array. The template ships `en`, `uk`,
+**To remove one:** delete its folder and its entry in that same array. The template ships `en`, `uk`
 and `ru` as sample content, not as a recommendation.
 
 **To remove i18next entirely** (it is 44 kB of the 57 kB vendor chunk): delete `src/i18n.js`, drop
-the three `i18next*` dependencies, remove the `syncLanguage` block and the `translate` handler from
-`src/bootstrap.js`, and replace `data-i18n` attributes with literal text in the templates.
+the three `i18next*` dependencies, replace the `t` in `src/bootstrap.js`'s page context with a
+function returning literal strings, and delete the language switcher from `src/templates/nav.js`.
 
 Detection order is querystring (`?lng=uk`), `localStorage`, cookie, then browser settings, and the
 choice is cached. Region subtags are stripped, so `en-GB` resolves to `en`.

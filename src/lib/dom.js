@@ -70,15 +70,21 @@ export const restoreFocus = (root, focus) => {
 };
 
 /**
- * Runs a DOM-replacing update with focus and caret preserved.
+ * Runs a DOM-replacing update with the reader's place kept: keyboard focus, the
+ * caret inside a text field, and the scroll position.
  *
  * @param {ParentNode} root scope to look the focused element up in afterwards
  * @param {() => void} update
  * @returns {void}
  */
-export const withPreservedFocus = (root, update) => {
+export const withPreservedView = (root, update) => {
   const focus = captureFocus();
+  const { scrollX, scrollY } = window;
 
   update();
+
   restoreFocus(root, focus);
+
+  // only scroll when the update actually moved the page
+  if (window.scrollX !== scrollX || window.scrollY !== scrollY) window.scrollTo(scrollX, scrollY);
 };
