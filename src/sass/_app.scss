@@ -1,65 +1,46 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
-}
+/*
+ * Global rules that Tailwind's preflight does not cover.
+ * Component-level styling belongs in utility classes, not here.
+ */
 
 html {
-  font-size: 16px;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#app {
-  height: 100%;
+body {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  color: var(--color-slate-900);
+  background-color: var(--color-white);
 }
 
-li {
-  list-style: none;
+@media (prefers-color-scheme: dark) {
+  body {
+    color: var(--color-slate-100);
+    background-color: var(--color-slate-950);
+  }
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+/* Honour the OS setting instead of animating for everyone. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-input,
-button,
-textarea {
-  border: none;
-  outline: none;
-  background: inherit;
-}
-
-img,
-video,
-canvas,
-svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-*,
-*::before,
-*::after {
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
+/* Keyboard focus must stay visible even where a design removes outlines. */
+:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
 }

@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "vanilla-vite-template",
+    "title": "vanilla-vite-template — легкий стартер на Vite"
+  },
+  "nav": {
+    "languages": "Вибір мови"
+  },
+  "hero": {
+    "title": "Стартер на Vite без податку на фреймворк",
+    "subtitle": "Шаблонізація чистим JavaScript, Tailwind CSS v4, Sass, i18next та Vitest — з'єднані разом, і нічого зайвого."
+  },
+  "features": {
+    "build": {
+      "title": "Збірка Vite",
+      "body": "Ассети з хешем розкладені за типом, один vendor-чанк і звіт про бандл через npm run analyze."
+    },
+    "styles": {
+      "title": "Tailwind CSS v4 + Sass",
+      "body": "Плагін Tailwind для Vite відповідає за утиліти та префікси; Sass лишається для кількох глобальних правил."
+    },
+    "i18n": {
+      "title": "i18next",
+      "body": "Переклади завантажуються по HTTP для кожної мови, вибір мови кешується в localStorage."
+    },
+    "quality": {
+      "title": "Контроль якості",
+      "body": "ESLint, Prettier, перевірка типів через JSDoc і Vitest запускаються на кожному коміті та в CI."
+    }
+  },
+  "counter": {
+    "hint": "Один делегований слухач обробляє всі взаємодії на сторінці.",
+    "label": "Кліків:"
+  },
+  "footer": {
+    "source": "Код на GitHub"
+  }
+}

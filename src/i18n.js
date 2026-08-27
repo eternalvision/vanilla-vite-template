@@ -1,28 +1,42 @@
-/*
- * i18next configuration for browser environment:
- * 1. uses HttpBackend to load translation files from `/locales/{{lng}}/{{ns}}.json`
- * 2. detects user language via querystring, localStorage, cookies, or browser settings
- * 3. caches detected language in localStorage and cookies
- * 4. falls back to English ('en') when no translation is available
- * 5. enables debug mode to assist during development
+/**
+ * i18next setup for the browser.
+ *
+ * - loads namespaces over HTTP from `/locales/{{lng}}/{{ns}}.json`
+ * - detects the language from querystring, localStorage, cookie, then navigator
+ * - debug output is enabled in dev only
  */
 
 import i18next from 'i18next';
-import Backend from 'i18next-http-backend';
+import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-i18next
-  .use(Backend)
+/** Languages shipped with the template. Add a folder under `public/locales` to extend. */
+export const SUPPORTED_LANGUAGES = /** @type {const} */ (['en', 'uk', 'ru']);
+
+export const FALLBACK_LANGUAGE = 'en';
+
+/** @type {Promise<import('i18next').TFunction>} */
+export const i18nReady = i18next
+  .use(HttpBackend)
   .use(LanguageDetector)
   .init({
-    fallbackLng: 'en',
+    fallbackLng: FALLBACK_LANGUAGE,
+    supportedLngs: [...SUPPORTED_LANGUAGES],
+    // strips region subtags, so `en-US` resolves to `en`
+    load: 'languageOnly',
     ns: ['common'],
-    debug: true,
+    defaultNS: 'common',
+    debug: import.meta.env.DEV,
+    interpolation: {
+      // the DOM is written through textContent, so i18next escaping is redundant
+      escapeValue: false,
+    },
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: `${import.meta.env.BASE_URL}locales/{{lng}}/{{ns}}.json`,
     },
     detection: {
       order: ['querystring', 'localStorage', 'cookie', 'navigator'],
+      lookupQuerystring: 'lng',
       caches: ['localStorage', 'cookie'],
     },
   });

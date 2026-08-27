@@ -1,10 +1,11 @@
-// this module exports a function that splits vendor modules into separate chunks for caching
-export const chunkSplitter = (id) => {
-  if (!id.includes('node_modules')) return;
-
-  const parts = id.split('node_modules/')[1].split('/');
-  const isScoped = parts[0].startsWith('@');
-  const pkgName = isScoped ? `${parts[0]}_${parts[1]}` : parts[0];
-
-  return `vendor/${pkgName}`;
-};
+/**
+ * Splits third-party code into a single long-lived `vendor` chunk.
+ *
+ * A chunk per package fragments caching into dozens of tiny requests and stalls
+ * the first paint behind a waterfall; one vendor chunk stays cached across app
+ * releases and costs a single request.
+ *
+ * @param {string} id absolute module id
+ * @returns {string | undefined} chunk name, or undefined to leave placement to the bundler
+ */
+export const chunkSplitter = (id) => (id.includes('node_modules') ? 'vendor' : undefined);

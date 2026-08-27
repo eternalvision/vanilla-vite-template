@@ -1,1 +1,38 @@
-{}
+{
+  "app": {
+    "name": "vanilla-vite-template",
+    "title": "vanilla-vite-template — a lightweight Vite starter"
+  },
+  "nav": {
+    "languages": "Select language"
+  },
+  "hero": {
+    "title": "A Vite starter without the framework tax",
+    "subtitle": "Plain JavaScript templating, Tailwind CSS v4, Sass, i18next and Vitest — wired together and nothing more."
+  },
+  "features": {
+    "build": {
+      "title": "Vite build",
+      "body": "Hashed assets sorted by type, a single vendor chunk, and a bundle report behind npm run analyze."
+    },
+    "styles": {
+      "title": "Tailwind CSS v4 + Sass",
+      "body": "The Tailwind Vite plugin handles utilities and prefixing; Sass stays for the handful of global rules."
+    },
+    "i18n": {
+      "title": "i18next",
+      "body": "Translations load over HTTP per language, with detection cached in localStorage."
+    },
+    "quality": {
+      "title": "Quality gates",
+      "body": "ESLint, Prettier, type-checked JSDoc and Vitest run on every commit and in CI."
+    }
+  },
+  "counter": {
+    "hint": "One delegated listener drives every interaction on the page.",
+    "label": "Clicks:"
+  },
+  "footer": {
+    "source": "Source on GitHub"
+  }
+}

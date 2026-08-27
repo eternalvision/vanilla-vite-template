@@ -1,9 +1,19 @@
 /*
- * tailwind CSS entry file
- * 1. imports the main Tailwind directives and utilities
- * 2. loads the Tailwind configuration from the project's config file
-!  3. ensure that @config remains immediately after the @import as required
+ * Tailwind CSS v4 entry.
+ *
+ * v4 is configured from CSS: `@theme` replaces `theme.extend` from the old
+ * JS config, and template scanning is automatic (respecting .gitignore), so
+ * there is no `content` array to keep in sync.
  */
 
 @import 'tailwindcss';
-@config "../tailwind.config.js";
+
+/* Sass partials are not scanned automatically — list any that hold class names. */
+@source "../src";
+
+@theme {
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
