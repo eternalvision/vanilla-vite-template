@@ -1,5 +1,6 @@
 export { assetFileNamer } from './assetFileNamer.js';
 export { chunkSplitter } from './chunkSplitter.js';
+export { normalizeBasePath } from './basePath.js';
 export { appMetaPlugin } from './appMetaPlugin.js';
 export {
   applyLicenseHolder,

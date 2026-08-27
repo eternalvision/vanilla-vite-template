@@ -2,6 +2,9 @@
  * Vite plugin exposing project identity from `package.json` to both the client
  * bundle (through the `virtual:app-meta` module) and `index.html` (through
  * `%APP_*%` placeholders), so a fork only has to edit `package.json`.
+ *
+ * `%APP_BASE%` is filled with the resolved `base`, so absolute references in
+ * `index.html` survive being served from a sub-path (GitHub project pages).
  */
 
 import { readAppMeta } from './appMeta.js';
@@ -16,15 +19,15 @@ const RESOLVED_ID = `\0${VIRTUAL_ID}`;
 export const appMetaPlugin = ({ root = process.cwd() } = {}) => {
   const meta = readAppMeta(root);
 
-  /** @type {Record<string, string>} */
-  const htmlPlaceholders = {
-    '%APP_NAME%': meta.name,
-    '%APP_DESCRIPTION%': meta.description,
-    '%APP_AUTHOR%': meta.author,
-  };
+  /** Resolved by Vite; always starts and ends with a slash. */
+  let base = '/';
 
   return {
     name: 'app-meta',
+
+    configResolved(config) {
+      base = config.base;
+    },
 
     resolveId(id) {
       return id === VIRTUAL_ID ? RESOLVED_ID : undefined;
@@ -37,7 +40,15 @@ export const appMetaPlugin = ({ root = process.cwd() } = {}) => {
     },
 
     transformIndexHtml(html) {
-      return Object.entries(htmlPlaceholders).reduce(
+      /** @type {Record<string, string>} */
+      const placeholders = {
+        '%APP_NAME%': meta.name,
+        '%APP_DESCRIPTION%': meta.description,
+        '%APP_AUTHOR%': meta.author,
+        '%APP_BASE%': base,
+      };
+
+      return Object.entries(placeholders).reduce(
         (result, [placeholder, value]) => result.replaceAll(placeholder, value),
         html,
       );

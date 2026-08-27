@@ -5,6 +5,9 @@
  * Autoprefixer — v4 handles prefixing itself). Minification is left to Vite 8's
  * defaults: oxc for JavaScript, Lightning CSS for stylesheets. `npm run analyze`
  * builds with a bundle treemap written to `dist/stats.html`.
+ *
+ * The public base path comes from `BASE_PATH`, so the same build works at a
+ * domain root and under a sub-path such as GitHub project pages.
  */
 
 import { fileURLToPath } from 'node:url';
@@ -12,15 +15,18 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-import { appMetaPlugin, assetFileNamer, chunkSplitter } from './conf/index.js';
+import { appMetaPlugin, assetFileNamer, chunkSplitter, normalizeBasePath } from './conf/index.js';
 
 const srcDir = fileURLToPath(new URL('./src', import.meta.url));
+
+// GitHub project pages are served from /<repo>/, so the deploy workflow sets BASE_PATH
+const base = normalizeBasePath(process.env.BASE_PATH);
 
 export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze';
 
   return {
-    base: '/',
+    base,
     publicDir: 'public',
     cacheDir: 'node_modules/.vite',
 
