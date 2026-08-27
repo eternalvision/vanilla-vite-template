@@ -4,35 +4,50 @@
     "title": "vanilla-vite-template — легкий стартер на Vite"
   },
   "nav": {
-    "languages": "Вибір мови"
+    "languages": "Вибір мови",
+    "about": "Про шаблон"
   },
   "hero": {
     "title": "Стартер на Vite без податку на фреймворк",
-    "subtitle": "Шаблонізація чистим JavaScript, Tailwind CSS v4, Sass, i18next та Vitest — з'єднані разом, і нічого зайвого."
+    "subtitle": "Шаблонізація чистим JavaScript, Tailwind CSS v4, i18next та Vitest — зʼєднані разом, і нічого зайвого."
   },
   "features": {
     "build": {
       "title": "Збірка Vite",
-      "body": "Ассети з хешем розкладені за типом, один vendor-чанк і звіт про бандл через npm run analyze."
+      "body": "Багатосторінковість з коробки: точка входу на кожен HTML-файл, ассети з хешем за типами і звіт про бандл через npm run analyze."
     },
     "styles": {
-      "title": "Tailwind CSS v4 + Sass",
-      "body": "Плагін Tailwind для Vite відповідає за утиліти та префікси; Sass лишається для кількох глобальних правил."
+      "title": "Tailwind CSS v4",
+      "body": "Налаштовується з CSS через @theme. Без ланцюжка PostCSS, без Autoprefixer, без препроцесора."
     },
     "i18n": {
       "title": "i18next",
-      "body": "Переклади завантажуються по HTTP для кожної мови, вибір мови кешується в localStorage."
+      "body": "Мова за замовчуванням у бандлі, тому перший кадр одразу з текстом; інші мови вантажаться по HTTP."
     },
     "quality": {
       "title": "Контроль якості",
       "body": "ESLint, Prettier, перевірка типів через JSDoc і Vitest запускаються на кожному коміті та в CI."
     }
   },
-  "counter": {
-    "hint": "Один делегований слухач обробляє всі взаємодії на сторінці.",
-    "label": "Кліків:"
-  },
   "footer": {
     "source": "Код на GitHub"
+  },
+  "counter": {
+    "label": "Кліків:"
+  },
+  "demo": {
+    "hint": "Введіть імʼя: регіон перемальовується на кожному натисканні, а курсор лишається на місці.",
+    "label": "Ваше імʼя",
+    "greeting": "Привіт,"
+  },
+  "about": {
+    "title": "Як додати сторінку",
+    "body": "Шаблон багатосторінковий за замовчуванням: без клієнтського роутера й History API, просто ще одна HTML-точка входу.",
+    "steps": {
+      "html": "Створіть about.html поруч з index.html і вкажіть у ньому новий модуль входу.",
+      "entry": "Створіть src/about.js, імпортуйте startApp зі спільного bootstrap і передайте вміст сторінки.",
+      "input": "Зареєструйте HTML-файл у build.rollupOptions.input у vite.config.js."
+    },
+    "back": "Повернутися на головну"
   }
 }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Sass, Vitest.",
+  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Vitest.",
   "license": "MIT",
   "author": "Alexander Priadchenko",
   "repository": {
@@ -41,7 +41,7 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md,css,scss,html,yml,yaml}": [
+    "*.{json,md,css,html,yml,yaml}": [
       "prettier --write"
     ]
   },
@@ -64,7 +64,6 @@
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",
     "rollup-plugin-visualizer": "^7.1.1",
-    "sass-embedded": "^1.103.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",

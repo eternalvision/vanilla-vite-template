@@ -32,13 +32,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - id: pages
+        uses: actions/configure-pages@v5
+
       - name: Build
         # project pages are served from https://<owner>.github.io/<repo>/
         env:
           BASE_PATH: ${{ github.event.repository.name }}
+          # absolute URLs for social-media crawlers, which ignore relative ones
+          SITE_URL: ${{ steps.pages.outputs.origin }}
         run: npm run build
-
-      - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v4
         with:

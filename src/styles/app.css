@@ -1,6 +1,9 @@
 /*
  * Global rules that Tailwind's preflight does not cover.
  * Component-level styling belongs in utility classes, not here.
+ *
+ * Plain CSS on purpose: nesting, custom properties and `@media` cover
+ * everything this file needs, so there is no preprocessor to install.
  */
 
 html {

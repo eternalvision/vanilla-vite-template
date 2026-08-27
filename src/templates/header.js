@@ -16,7 +16,13 @@ export const header = ({ languages, language }) => html`
           class="text-sm font-semibold tracking-tight whitespace-nowrap sm:text-base"
           data-i18n="app.name"></span>
       </a>
-      ${nav({ languages, language })}
+      <div class="flex items-center gap-4">
+        <a
+          href="${import.meta.env.BASE_URL}about.html"
+          class="text-sm text-slate-500 underline-offset-4 hover:underline dark:text-slate-400"
+          data-i18n="nav.about"></a>
+        ${nav({ languages, language })}
+      </div>
     </div>
   </header>
 `;

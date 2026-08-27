@@ -14,5 +14,5 @@
       "purpose": "any"
     }
   ],
-  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Sass, Vitest."
+  "description": "A dependency-light Vite starter: vanilla JS templating, i18next, Tailwind CSS v4, Vitest."
 }

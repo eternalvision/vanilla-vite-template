@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APP_META } from 'virtual:app-meta';
 
+import { about } from '@/templates';
+
 import { applyTranslations, bindEvents, markActiveLanguage, render } from '@/app.js';
 
 /** @type {HTMLElement} */
@@ -11,6 +13,10 @@ const PROPS = { languages: ['en', 'uk'], language: 'en', year: 2026 };
 
 /** @param {string} key */
 const translate = (key) => `t:${key}`;
+
+/** Clicks the counter by re-querying it, since the region replaces the node. */
+const clickCounter = () =>
+  /** @type {HTMLElement | null} */ (root.querySelector('[data-counter]'))?.click();
 
 beforeEach(() => {
   document.body.innerHTML = '<div id="app"></div>';
@@ -49,6 +55,15 @@ describe('render', () => {
     render(root, PROPS);
 
     expect(root.querySelector('footer')?.textContent).toContain(APP_META.author);
+  });
+
+  it('renders the page content it is given, keeping the shared shell', () => {
+    render(root, { ...PROPS, content: about() });
+
+    expect(root.querySelector('[data-i18n="about.title"]')).not.toBeNull();
+    expect(root.querySelector('[data-region="demo"]')).toBeNull();
+    expect(root.querySelector('header')).not.toBeNull();
+    expect(root.querySelector('footer')).not.toBeNull();
   });
 
   it('replaces previous content instead of appending', () => {
@@ -114,11 +129,58 @@ describe('bindEvents', () => {
     render(root, PROPS);
     bindEvents(root, { onLanguageChange: vi.fn() });
 
-    const button = /** @type {HTMLElement} */ (root.querySelector('[data-counter]'));
-    button.click();
-    button.click();
+    // the region is re-rendered, so the button node is replaced between clicks
+    clickCounter();
+    clickCounter();
 
     expect(root.querySelector('[data-counter-value]')?.textContent).toBe('2');
+  });
+
+  it('keeps focus on the counter across the re-render it triggers', () => {
+    render(root, PROPS);
+    bindEvents(root, { onLanguageChange: vi.fn() });
+
+    const button = /** @type {HTMLElement} */ (root.querySelector('[data-counter]'));
+    button.focus();
+    button.click();
+
+    expect(document.activeElement).toBe(root.querySelector('[data-counter]'));
+    expect(document.activeElement).not.toBe(button);
+  });
+
+  it('re-renders the region on input and keeps the caret where it was', () => {
+    render(root, PROPS);
+    bindEvents(root, { onLanguageChange: vi.fn() });
+
+    const input = /** @type {HTMLInputElement} */ (root.querySelector('[data-state="name"]'));
+    input.focus();
+    input.value = 'Ada';
+    input.setSelectionRange(2, 2);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const current = /** @type {HTMLInputElement} */ (root.querySelector('[data-state="name"]'));
+    expect(current.value).toBe('Ada');
+    expect(document.activeElement).toBe(current);
+    expect(current.selectionStart).toBe(2);
+  });
+
+  it('translates freshly rendered region markup', () => {
+    render(root, PROPS);
+    bindEvents(root, { onLanguageChange: vi.fn(), translate: (key) => `t:${key}` });
+
+    clickCounter();
+
+    expect(root.querySelector('[data-i18n="counter.label"]')?.textContent).toBe('t:counter.label');
+  });
+
+  it('stops handling input after unsubscribe', () => {
+    render(root, PROPS);
+    const unbind = bindEvents(root, { onLanguageChange: vi.fn() });
+
+    unbind();
+    clickCounter();
+
+    expect(root.querySelector('[data-counter-value]')?.textContent).toBe('0');
   });
 
   it('stops handling clicks after unsubscribe', () => {
