@@ -5,6 +5,8 @@
  *
  * `%APP_BASE%` is filled with the resolved `base`, so absolute references in
  * `index.html` survive being served from a sub-path (GitHub project pages).
+ * `%APP_URL%` is the same path prefixed with `SITE_URL` when that is set, which
+ * social-media crawlers need — they do not resolve relative image URLs.
  */
 
 import { readAppMeta } from './appMeta.js';
@@ -21,6 +23,9 @@ export const appMetaPlugin = ({ root = process.cwd() } = {}) => {
 
   /** Resolved by Vite; always starts and ends with a slash. */
   let base = '/';
+
+  /** Origin of the deployed site, e.g. `https://owner.github.io`; set by CI. */
+  const siteUrl = (process.env.SITE_URL ?? '').replace(/\/+$/, '');
 
   return {
     name: 'app-meta',
@@ -46,6 +51,7 @@ export const appMetaPlugin = ({ root = process.cwd() } = {}) => {
         '%APP_DESCRIPTION%': meta.description,
         '%APP_AUTHOR%': meta.author,
         '%APP_BASE%': base,
+        '%APP_URL%': `${siteUrl}${base}`,
       };
 
       return Object.entries(placeholders).reduce(

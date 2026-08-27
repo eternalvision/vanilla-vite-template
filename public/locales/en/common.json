@@ -4,35 +4,50 @@
     "title": "vanilla-vite-template — a lightweight Vite starter"
   },
   "nav": {
-    "languages": "Select language"
+    "languages": "Select language",
+    "about": "About"
   },
   "hero": {
     "title": "A Vite starter without the framework tax",
-    "subtitle": "Plain JavaScript templating, Tailwind CSS v4, Sass, i18next and Vitest — wired together and nothing more."
+    "subtitle": "Plain JavaScript templating, Tailwind CSS v4, i18next and Vitest — wired together and nothing more."
   },
   "features": {
     "build": {
       "title": "Vite build",
-      "body": "Hashed assets sorted by type, a single vendor chunk, and a bundle report behind npm run analyze."
+      "body": "Multi-page by default: one entry per HTML file, hashed assets sorted by type, and a bundle report behind npm run analyze."
     },
     "styles": {
-      "title": "Tailwind CSS v4 + Sass",
-      "body": "The Tailwind Vite plugin handles utilities and prefixing; Sass stays for the handful of global rules."
+      "title": "Tailwind CSS v4",
+      "body": "Configured from CSS with @theme. No PostCSS chain, no Autoprefixer, no preprocessor to install."
     },
     "i18n": {
       "title": "i18next",
-      "body": "Translations load over HTTP per language, with detection cached in localStorage."
+      "body": "The fallback language is bundled, so the first paint has real text; other languages load over HTTP."
     },
     "quality": {
       "title": "Quality gates",
       "body": "ESLint, Prettier, type-checked JSDoc and Vitest run on every commit and in CI."
     }
   },
-  "counter": {
-    "hint": "One delegated listener drives every interaction on the page.",
-    "label": "Clicks:"
-  },
   "footer": {
     "source": "Source on GitHub"
+  },
+  "counter": {
+    "label": "Clicks:"
+  },
+  "demo": {
+    "hint": "Type your name: the region re-renders on every keystroke, and the caret stays put.",
+    "label": "Your name",
+    "greeting": "Hello,"
+  },
+  "about": {
+    "title": "Adding a page",
+    "body": "This template is multi-page by default: no client-side router, no history API, just another HTML entry point.",
+    "steps": {
+      "html": "Create about.html next to index.html and point its script at a new entry module.",
+      "entry": "Create src/about.js, import startApp from the shared bootstrap, and pass it the page content.",
+      "input": "Register the HTML file under build.rollupOptions.input in vite.config.js."
+    },
+    "back": "Back to the home page"
   }
 }

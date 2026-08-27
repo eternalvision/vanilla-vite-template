@@ -48,14 +48,6 @@ export default defineConfig(({ mode }) => {
       },
     },
 
-    css: {
-      preprocessorOptions: {
-        scss: {
-          loadPaths: ['src/sass'],
-        },
-      },
-    },
-
     server: {
       port: 9999,
     },
@@ -74,6 +66,11 @@ export default defineConfig(({ mode }) => {
       cssMinify: 'lightningcss',
       chunkSizeWarningLimit: 500,
       rollupOptions: {
+        // one entry per HTML page; add a file here to add a page
+        input: {
+          index: fileURLToPath(new URL('./index.html', import.meta.url)),
+          about: fileURLToPath(new URL('./about.html', import.meta.url)),
+        },
         output: {
           entryFileNames: 'js/[name]-[hash].js',
           chunkFileNames: 'js/[name]-[hash].js',

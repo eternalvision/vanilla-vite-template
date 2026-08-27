@@ -13,6 +13,8 @@
     "checkJs": true,
     "noEmit": true,
     "skipLibCheck": true,
+    // @types/node imports the untyped `punycode` package, which checkJs would
+    // otherwise type-check as third-party JavaScript. 0 = never load JS from node_modules.
     "maxNodeModuleJsDepth": 0,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,

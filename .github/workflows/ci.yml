@@ -15,16 +15,22 @@ permissions:
 
 jobs:
   verify:
-    name: Lint, typecheck, test, build
+    name: Node ${{ matrix.node }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # the oldest supported major and the current LTS
+        node: [22, 24]
 
     steps:
       - uses: actions/checkout@v5
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: npm
 
       - name: Install dependencies
@@ -49,6 +55,7 @@ jobs:
         run: npm run build
 
       - name: Upload build output
+        if: matrix.node == 24
         uses: actions/upload-artifact@v4
         with:
           name: dist

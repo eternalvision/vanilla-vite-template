@@ -4,7 +4,8 @@
  * whole module is testable in jsdom without touching globals.
  */
 
-import { layout } from '@/templates';
+import { renderInto, withPreservedFocus } from '@/lib/dom.js';
+import { demo, layout } from '@/templates';
 
 /**
  * Fills elements carrying `data-i18n` (text) and `data-i18n-attr` (attributes,
@@ -49,7 +50,12 @@ export const markActiveLanguage = (root, language) => {
  * Renders the layout into `root`, replacing whatever was there.
  *
  * @param {Element} root
- * @param {{ languages: readonly string[], language: string, year: number }} props
+ * @param {{
+ *   languages: readonly string[],
+ *   language: string,
+ *   year: number,
+ *   content?: import('@/lib/html.js').RawHtml,
+ * }} props
  * @returns {void}
  */
 export const render = (root, props) => {
@@ -57,19 +63,35 @@ export const render = (root, props) => {
 };
 
 /**
- * Wires the demo interactions through a single delegated listener.
+ * Wires the demo interactions through delegated listeners on the root, so no
+ * handler has to be rebound when the stateful region re-renders.
  *
  * @param {Element} root
- * @param {{ onLanguageChange: (language: string) => void }} handlers
+ * @param {{
+ *   onLanguageChange: (language: string) => void,
+ *   translate?: (key: string) => string,
+ * }} handlers
  * @returns {() => void} unsubscribe
  */
-export const bindEvents = (root, { onLanguageChange }) => {
-  let count = 0;
+export const bindEvents = (root, { onLanguageChange, translate = (key) => key }) => {
+  /** @type {import('@/templates/main.js').DemoState} */
+  const state = { name: '', count: 0 };
+
+  const updateDemoRegion = () => {
+    const region = root.querySelector('[data-region="demo"]');
+
+    if (!region) return;
+
+    withPreservedFocus(root, () => {
+      renderInto(region, demo(state));
+      applyTranslations(region, translate);
+    });
+  };
 
   /** @param {Event} event */
   const onClick = (event) => {
     const target = /** @type {Element | null} */ (event.target);
-    if (!target || !('closest' in target)) return;
+    if (!(target instanceof Element)) return;
 
     const languageButton = /** @type {HTMLElement | null} */ (target.closest('[data-language]'));
     if (languageButton?.dataset.language) {
@@ -78,13 +100,26 @@ export const bindEvents = (root, { onLanguageChange }) => {
     }
 
     if (target.closest('[data-counter]')) {
-      count += 1;
-      const output = root.querySelector('[data-counter-value]');
-      if (output) output.textContent = String(count);
+      state.count += 1;
+      updateDemoRegion();
     }
   };
 
-  root.addEventListener('click', onClick);
+  /** @param {Event} event */
+  const onInput = (event) => {
+    const target = event.target;
 
-  return () => root.removeEventListener('click', onClick);
+    if (!(target instanceof HTMLInputElement) || target.dataset.state !== 'name') return;
+
+    state.name = target.value;
+    updateDemoRegion();
+  };
+
+  root.addEventListener('click', onClick);
+  root.addEventListener('input', onInput);
+
+  return () => {
+    root.removeEventListener('click', onClick);
+    root.removeEventListener('input', onInput);
+  };
 };
